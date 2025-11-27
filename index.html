@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แอพสร้าง QR Code พร้อมเพย์</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .btn-icon {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .btn-icon:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+            margin-top: 10px;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 8px 12px;
+            font-size: 14px;
+            width: auto;
+        }
+        
+        .qr-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        #qrcode {
+            display: inline-block;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        #qrcode canvas {
+            display: block !important;
+            margin: 0 auto;
+        }
+        
+        #qrcode img {
+            display: none !important;
+        }
+        
+        .amount-display {
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .bank-list {
+            margin-top: 20px;
+        }
+        
+        .bank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .bank-info h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .bank-info p {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 16px;
+            padding: 5px;
+        }
+        
+        .back-btn:hover {
+            opacity: 0.8;
+        }
+
+        .info-notice {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <!-- หน้าหลัก -->
+    <div id="mainPage" class="container">
+        <div class="header">
+            <h1>สร้าง QR Code</h1>
+            <button class="btn-icon" onclick="showSettings()">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 1v6m0 6v6m5.2-14.2l-4.2 4.2m0 6l4.2 4.2M23 12h-6m-6 0H1m14.2 5.2l-4.2-4.2m0-6l-4.2-4.2"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="content">
+            <div id="emptyState" class="empty-state">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <h2>ยังไม่มีธนาคารในระบบ</h2>
+                <p style="margin: 10px 0 20px;">เพิ่มธนาคารเพื่อเริ่มใช้งาน</p>
+                <button class="btn btn-primary" onclick="showSettings()">เพิ่มธนาคาร</button>
+            </div>
+            
+            <div id="mainForm" class="hidden">
+                <div class="info-notice">
+                    ⚠️ ข้อมูลธนาคารจะหายเมื่อรีเฟรชหน้า
+                </div>
+                
+                <div class="form-group">
+                    <label>เลือกธนาคาร</label>
+                    <select id="bankSelect">
+                        <option value="">-- เลือกธนาคาร --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>จำนวนเงิน (บาท)</label>
+                    <input type="number" id="amount" placeholder="0.00" step="0.01" min="0">
+                </div>
+                
+                <button class="btn btn-primary" onclick="generateQR()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    สร้าง QR Code
+                </button>
+                
+                <div id="qrResult" class="qr-container hidden">
+                    <div id="qrcode"></div>
+                    <div class="amount-display">฿ <span id="displayAmount">0.00</span></div>
+                    <button class="btn btn-success" onclick="downloadQR()">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m4-5l5 5 5-5m-5 5V3"></path>
+                        </svg>
+                        บันทึก QR Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- หน้าตั้งค่า -->
+    <div id="settingsPage" class="container hidden">
+        <div class="header">
+            <button class="back-btn" onclick="showMain()">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                กลับ
+            </button>
+            <h1>ตั้งค่าธนาคาร</h1>
+            <div style="width: 40px;"></div>
+        </div>
+        
+        <div class="content">
+            <div class="info-notice">
+                ⚠️ ข้อมูลจะหายเมื่อรีเฟรชหน้า (ไม่มีการบันทึกถาวร)
+            </div>
+            
+            <h2 style="margin-bottom: 15px;">ธนาคารที่บันทึกไว้ (<span id="bankCount">0</span>/5)</h2>
+            <div id="bankList" class="bank-list"></div>
+            
+            <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #e0e0e0;">
+                <h2 style="margin-bottom: 15px;">เพิ่มธนาคารใหม่</h2>
+                <div class="form-group">
+                    <label>ชื่อธนาคาร</label>
+                    <input type="text" id="bankName" placeholder="เช่น ธนาคารกสิกรไทย">
+                </div>
+                
+                <div class="form-group">
+                    <label>เบอร์พร้อมเพย์ (10 หลัก)</label>
+                    <input type="tel" id="bankPhone" placeholder="0812345678" maxlength="10">
+                </div>
+                
+                <button class="btn btn-primary" onclick="addBank()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    เพิ่มธนาคาร
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // เก็บข้อมูลในหน่วยความจำ (in-memory storage)
+        let banks = [];
+        
+        // เพิ่มธนาคาร
+        function addBank() {
+            const name = document.getElementById('bankName').value.trim();
+            const phone = document.getElementById('bankPhone').value.trim();
+            
+            if (!name || !phone) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+            
+            if (phone.length !== 10 || !/^\d+$/.test(phone)) {
+                alert('เบอร์โทรศัพท์ไม่ถูกต้อง กรุณากรอก 10 หลัก');
+                return;
+            }
+            
+            if (banks.length >= 5) {
+                alert('เพิ่มธนาคารได้สูงสุด 5 ธนาคาร');
+                return;
+            }
+            
+            banks.push({
+                id: Date.now(),
+                name: name,
+                phone: phone
+            });
+            
+            updateUI();
+            
+            document.getElementById('bankName').value = '';
+            document.getElementById('bankPhone').value = '';
+            
+            alert('เพิ่มธนาคารสำเร็จ!');
+        }
+        
+        // ลบธนาคาร
+        function deleteBank(id) {
+            if (confirm('ต้องการลบธนาคารนี้ใช่หรือไม่?')) {
+                banks = banks.filter(b => b.id !== id);
+                updateUI();
+            }
+        }
+        
+        // อัปเดต UI
+        function updateUI() {
+            const bankList = document.getElementById('bankList');
+            const bankSelect = document.getElementById('bankSelect');
+            const bankCount = document.getElementById('bankCount');
+            
+            bankCount.textContent = banks.length;
+            
+            // อัปเดตรายการธนาคาร
+            if (banks.length === 0) {
+                bankList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">ยังไม่มีธนาคาร</p>';
+            } else {
+                bankList.innerHTML = banks.map(bank => `
+                    <div class="bank-item">
+                        <div class="bank-info">
+                            <h3>${escapeHtml(bank.name)}</h3>
+                            <p>${escapeHtml(bank.phone)}</p>
+                        </div>
+                        <button class="btn btn-danger" onclick="deleteBank(${bank.id})">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `).join('');
+            }
+            
+            // อัปเดต dropdown
+            bankSelect.innerHTML = '<option value="">-- เลือกธนาคาร --</option>';
+            banks.forEach(bank => {
+                const option = document.createElement('option');
+                option.value = bank.id;
+                option.textContent = `${bank.name} (${bank.phone})`;
+                bankSelect.appendChild(option);
+            });
+            
+            // แสดง/ซ่อนหน้าหลัก
+            if (banks.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('mainForm').classList.add('hidden');
+            } else {
+                document.getElementById('emptyState').classList.add('hidden');
+                document.getElementById('mainForm').classList.remove('hidden');
+            }
+        }
+        
+        // ป้องกัน XSS
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+        
+        // สร้าง QR Code
+        function generateQR() {
+            const bankId = document.getElementById('bankSelect').value;
+            const amount = document.getElementById('amount').value;
+            
+            if (!bankId) {
+                alert('กรุณาเลือกธนาคาร');
+                return;
+            }
+            
+            if (!amount || parseFloat(amount) <= 0) {
+                alert('กรุณาระบุจำนวนเงิน');
+                return;
+            }
+            
+            const bank = banks.find(b => b.id == bankId);
+            if (!bank) return;
+            
+            // สร้างข้อมูล QR ตามมาตรฐาน PromptPay
+            const qrData = generatePromptPayQR(bank.phone, amount);
+            
+            // ล้าง QR Code เก่าทั้งหมด - สำคัญมาก!
+            const qrDiv = document.getElementById('qrcode');
+            qrDiv.innerHTML = '';
+            
+            // รอสักครู่ให้ DOM อัปเดต
+            setTimeout(() => {
+                // สร้าง QR Code ใหม่
+                new QRCode(qrDiv, {
+                    text: qrData,
+                    width: 256,
+                    height: 256,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+                
+                // แสดงผล
+                document.getElementById('displayAmount').textContent = parseFloat(amount).toFixed(2);
+                document.getElementById('qrResult').classList.remove('hidden');
+            }, 10);
+        }
+        
+        // สร้างข้อมูล QR ตามมาตรฐาน EMVCo สำหรับ PromptPay
+        function generatePromptPayQR(phone, amount) {
+            // แปลงเบอร์โทรเป็นรูปแบบ PromptPay (0066xxxxxxxxx - 13 หลัก)
+            let formattedPhone = phone.replace(/\D/g, '');
+            if (formattedPhone.startsWith('0')) {
+                formattedPhone = '0066' + formattedPhone.substring(1);
+            } else if (formattedPhone.startsWith('66')) {
+                formattedPhone = '00' + formattedPhone;
+            } else {
+                formattedPhone = '0066' + formattedPhone;
+            }
+            
+            // สร้าง Payload Format Indicator
+            let payload = '';
+            payload += '000201'; // Payload Format Indicator
+            payload += '010212'; // Point of Initiation Method (12 = dynamic)
+            
+            // Merchant Account Information (Tag 29) - PromptPay
+            let tag29 = '';
+            tag29 += '0016'; // Application ID length
+            tag29 += 'A000000677010111'; // AID for PromptPay
+            tag29 += '01' + formattedPhone.length.toString().padStart(2, '0') + formattedPhone;
+            payload += '29' + tag29.length.toString().padStart(2, '0') + tag29;
+            
+            payload += '5303764'; // Currency Code (THB)
+            
+            // Transaction Amount
+            if (amount && parseFloat(amount) > 0) {
+                const amountStr = parseFloat(amount).toFixed(2);
+                payload += '54' + amountStr.length.toString().padStart(2, '0') + amountStr;
+            }
+            
+            payload += '5802TH'; // Country Code
+            
+            // CRC
+            payload += '6304';
+            const crcValue = crc16(payload);
+            payload += crcValue;
+            
+            return payload;
+        }
+        
+        // คำนวณ CRC16-CCITT
+        function crc16(data) {
+            let crc = 0xFFFF;
+            const polynomial = 0x1021;
+            
+            for (let i = 0; i < data.length; i++) {
+                crc ^= (data.charCodeAt(i) << 8);
+                
+                for (let j = 0; j < 8; j++) {
+                    if (crc & 0x8000) {
+                        crc = ((crc << 1) ^ polynomial) & 0xFFFF;
+                    } else {
+                        crc = (crc << 1) & 0xFFFF;
+                    }
+                }
+            }
+            
+            return crc.toString(16).toUpperCase().padStart(4, '0');
+        }
+        
+        // ดาวน์โหลด QR Code
+        function downloadQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) {
+                alert('ไม่พบ QR Code');
+                return;
+            }
+            
+            const amount = document.getElementById('amount').value;
+            const link = document.createElement('a');
+            link.download = `promptpay-${amount}baht.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // สลับหน้า
+        function showSettings() {
+            document.getElementById('mainPage').classList.add('hidden');
+            document.getElementById('settingsPage').classList.remove('hidden');
+        }
+        
+        function showMain() {
+            document.getElementById('mainPage').classList.remove('hidden');
+            document.getElementById('settingsPage').classList.add('hidden');
+            document.getElementById('qrResult').classList.add('hidden');
+        }
+        
+        // เริ่มต้น
+        updateUI();
+    </script>
+</body>
+</html>
