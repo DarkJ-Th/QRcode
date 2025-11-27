@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แอพสร้าง QR Code พร้อมเพย์</title>
-    <link rel="manifest" href="manifest.json">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <title>QR Prompt Pay - สร้าง QR Code พร้อมเพย์</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.js"></script>
     <style>
         * {
             margin: 0;
@@ -36,7 +35,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative;
         }
         
         .header h1 {
@@ -57,12 +55,17 @@
             justify-content: center;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
         .btn-icon:hover {
             background: rgba(255,255,255,0.3);
             transform: scale(1.1) rotate(15deg);
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn-icon:active {
+            transform: scale(0.95);
         }
         
         .content {
@@ -135,6 +138,17 @@
         .btn-success:hover {
             background: #059669;
         }
+
+        .btn-install {
+            background: #f59e0b;
+            color: white;
+            margin-top: 10px;
+        }
+        
+        .btn-install:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
         
         .btn-danger {
             background: #ef4444;
@@ -145,15 +159,9 @@
             border-radius: 8px;
         }
         
-        .btn-install {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-            margin-top: 10px;
-        }
-        
-        .btn-install:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: scale(1.05);
         }
         
         .qr-container {
@@ -200,6 +208,13 @@
             background: #f9fafb;
             border-radius: 10px;
             margin-bottom: 10px;
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+        
+        .bank-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         .bank-info h3 {
@@ -237,106 +252,86 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
             font-size: 16px;
-            padding: 5px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
         
         .back-btn:hover {
-            opacity: 0.8;
+            background: rgba(255,255,255,0.1);
+            transform: translateX(-3px);
         }
-
-        .info-notice {
-            background: #d1fae5;
-            border: 1px solid #10b981;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #065f46;
-        }
-
-        .install-notice {
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #92400e;
-        }
-
-        .pwa-install-btn {
-            position: absolute;
+        
+        .notification {
+            position: fixed;
             top: 20px;
-            right: 70px;
-            background: rgba(255,255,255,0.2);
-            border: none;
+            right: 20px;
+            background: #10b981;
             color: white;
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            cursor: pointer;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .app-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
             backdrop-filter: blur(10px);
         }
 
-        .pwa-install-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        .install-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fffbeb;
+            border: 2px dashed #f59e0b;
+            border-radius: 10px;
+            text-align: center;
         }
 
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+        .install-text {
+            font-size: 14px;
+            color: #92400e;
+            margin-bottom: 10px;
         }
 
-        /* สไตล์ไอคอนใหม่ */
-        .icon-settings {
+        /* สไตล์ใหม่สำหรับไอคอนตั้งค่า */
+        .settings-icon {
             width: 24px;
             height: 24px;
             position: relative;
         }
 
-        .icon-settings .gear {
-            width: 20px;
-            height: 20px;
-            border: 2px solid currentColor;
-            border-radius: 50%;
-            position: relative;
+        .settings-icon .gear {
+            width: 100%;
+            height: 100%;
+            animation: rotate 20s linear infinite;
+            transform-origin: center;
         }
 
-        .icon-settings .gear:before {
-            content: '';
-            position: absolute;
-            width: 12px;
-            height: 2px;
-            background: currentColor;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .icon-settings .gear:after {
-            content: '';
-            position: absolute;
-            width: 2px;
-            height: 12px;
-            background: currentColor;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .icon-settings .inner-gear {
+        .settings-icon .gear-inner {
             width: 8px;
             height: 8px;
-            border: 1px solid currentColor;
+            background: white;
             border-radius: 50%;
             position: absolute;
             top: 50%;
@@ -344,60 +339,32 @@
             transform: translate(-50%, -50%);
         }
 
-        .icon-install {
-            width: 24px;
-            height: 24px;
-            position: relative;
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
-        .icon-install .phone {
-            width: 16px;
+        /* สไตล์สำหรับไอคอนกลับ */
+        .back-icon {
+            width: 20px;
             height: 20px;
-            border: 2px solid currentColor;
-            border-radius: 3px;
-            position: relative;
+            transition: transform 0.3s ease;
         }
 
-        .icon-install .phone:before {
-            content: '';
-            position: absolute;
-            width: 6px;
-            height: 1px;
-            background: currentColor;
-            top: -3px;
-            left: 50%;
-            transform: translateX(-50%);
+        .back-btn:hover .back-icon {
+            transform: translateX(-3px);
         }
 
-        .icon-install .phone:after {
-            content: '';
-            position: absolute;
-            width: 4px;
-            height: 1px;
-            background: currentColor;
-            bottom: -2px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .icon-install .download {
-            position: absolute;
-            bottom: -8px;
-            right: -8px;
-            width: 16px;
-            height: 16px;
-            background: #f59e0b;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .icon-install .download:before {
-            content: '↓';
-            color: white;
-            font-size: 10px;
-            font-weight: bold;
+        /* สไตล์สำหรับฟอร์ม */
+        .form-container {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
         }
     </style>
 </head>
@@ -405,46 +372,58 @@
     <!-- หน้าหลัก -->
     <div id="mainPage" class="container">
         <div class="header">
-            <h1>สร้าง QR Code</h1>
-            <div class="header-buttons">
-                <button id="installButton" class="pwa-install-btn hidden">
-                    <div class="icon-install">
-                        <div class="phone"></div>
-                        <div class="download"></div>
-                    </div>
-                </button>
-                <button class="btn-icon" onclick="showSettings()">
-                    <div class="icon-settings">
-                        <div class="gear"></div>
-                        <div class="inner-gear"></div>
-                    </div>
-                </button>
+            <div class="app-title">
+                <div class="app-icon">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                </div>
+                <h1>QR Prompt Pay</h1>
             </div>
+            <button class="btn-icon" onclick="showSettings()" title="ตั้งค่า">
+                <div class="settings-icon">
+                    <svg class="gear" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </div>
+            </button>
         </div>
         
         <div class="content">
-            <div id="installNotice" class="install-notice hidden">
-                💡 ติดตั้งแอพเพื่อใช้งานได้แบบออฟไลน์และประสบการณ์ที่ดีขึ้น
-            </div>
-
             <div id="emptyState" class="empty-state">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                <h2>ยังไม่มีธนาคารในระบบ</h2>
-                <p style="margin: 10px 0 20px;">เพิ่มธนาคารเพื่อเริ่มใช้งาน</p>
-                <button class="btn btn-primary" onclick="showSettings()">เพิ่มธนาคาร</button>
+                <h2>ยังไม่มีบัญชีพร้อมเพย์</h2>
+                <p style="margin: 10px 0 20px;">เพิ่มบัญชีพร้อมเพย์เพื่อเริ่มใช้งาน</p>
+                <button class="btn btn-primary" onclick="showSettings()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    เพิ่มบัญชีพร้อมเพย์
+                </button>
+                
+                <!-- ส่วนติดตั้งแอพในหน้า empty state -->
+                <div class="install-section">
+                    <p class="install-text">💡 ติดตั้งแอพเพื่อใช้งานได้สะดวกยิ่งขึ้น</p>
+                    <button id="installButtonEmpty" class="btn btn-install hidden">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        ติดตั้งแอพ
+                    </button>
+                </div>
             </div>
             
             <div id="mainForm" class="hidden">
-                <div class="info-notice">
-                    ✅ ข้อมูลธนาคารจะถูกบันทึกไว้โดยอัตโนมัติ
-                </div>
-                
                 <div class="form-group">
-                    <label>เลือกธนาคาร</label>
+                    <label>เลือกบัญชีพร้อมเพย์</label>
                     <select id="bankSelect">
-                        <option value="">-- เลือกธนาคาร --</option>
+                        <option value="">-- เลือกบัญชีพร้อมเพย์ --</option>
                     </select>
                 </div>
                 
@@ -462,6 +441,17 @@
                     </svg>
                     สร้าง QR Code
                 </button>
+
+                <!-- ส่วนติดตั้งแอพในหน้าหลัก -->
+                <div class="install-section">
+                    <p class="install-text">💡 ติดตั้งแอพเพื่อใช้งานได้สะดวกยิ่งขึ้น</p>
+                    <button id="installButtonMain" class="btn btn-install hidden">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        ติดตั้งแอพ
+                    </button>
+                </div>
                 
                 <div id="qrResult" class="qr-container hidden">
                     <div id="qrcode"></div>
@@ -481,62 +471,85 @@
     <div id="settingsPage" class="container hidden">
         <div class="header">
             <button class="back-btn" onclick="showMain()">
-                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <svg class="back-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
                 </svg>
                 กลับ
             </button>
-            <h1>ตั้งค่าธนาคาร</h1>
-            <div style="width: 40px;"></div>
+            <h1>ตั้งค่าบัญชีพร้อมเพย์</h1>
+            <div style="width: 44px;"></div>
         </div>
         
         <div class="content">
-            <div class="info-notice">
-                ✅ ข้อมูลจะถูกบันทึกไว้โดยอัตโนมัติเมื่อรีเฟรชหน้า
-            </div>
-            
-            <h2 style="margin-bottom: 15px;">ธนาคารที่บันทึกไว้ (<span id="bankCount">0</span>/5)</h2>
+            <h2 style="margin-bottom: 15px;">บัญชีพร้อมเพย์ที่บันทึกไว้ (<span id="bankCount">0</span>/5)</h2>
             <div id="bankList" class="bank-list"></div>
             
             <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #e0e0e0;">
-                <h2 style="margin-bottom: 15px;">เพิ่มธนาคารใหม่</h2>
-                <div class="form-group">
-                    <label>ชื่อธนาคาร</label>
-                    <input type="text" id="bankName" placeholder="เช่น ธนาคารกสิกรไทย">
+                <h2 style="margin-bottom: 15px;">เพิ่มบัญชีพร้อมเพย์ใหม่</h2>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label>ชื่อบัญชี</label>
+                        <input type="text" id="bankName" placeholder="เช่น สมชาย ใจดี">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>เบอร์พร้อมเพย์ (10 หลัก)</label>
+                        <input type="tel" id="bankPhone" placeholder="0812345678" maxlength="10">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="addBank()">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        เพิ่มบัญชีพร้อมเพย์
+                    </button>
                 </div>
-                
-                <div class="form-group">
-                    <label>เบอร์พร้อมเพย์ (10 หลัก)</label>
-                    <input type="tel" id="bankPhone" placeholder="0812345678" maxlength="10">
-                </div>
-                
-                <button class="btn btn-primary" onclick="addBank()">
+            </div>
+
+            <!-- ส่วนติดตั้งแอพในหน้าตั้งค่า -->
+            <div class="install-section" style="margin-top: 30px;">
+                <p class="install-text">💡 ติดตั้งแอพเพื่อใช้งานได้สะดวกยิ่งขึ้น</p>
+                <button id="installButtonSettings" class="btn btn-install hidden">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
-                    เพิ่มธนาคาร
+                    ติดตั้งแอพ
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <span id="notificationText">ดำเนินการเสร็จสิ้น</span>
+    </div>
+
     <script>
-        // จัดการข้อมูลธนาคาร
+        // จัดการข้อมูลบัญชีพร้อมเพย์
         let banks = [];
         let deferredPrompt;
-
+        
         // โหลดข้อมูลจาก localStorage
         function loadBanks() {
-            const saved = localStorage.getItem('promptPayBanks');
-            if (saved) {
-                banks = JSON.parse(saved);
+            try {
+                const saved = localStorage.getItem('qrPromptPay_accounts');
+                if (saved) {
+                    banks = JSON.parse(saved);
+                }
+            } catch (error) {
+                console.log('ไม่สามารถโหลดข้อมูลจาก localStorage ได้');
+                banks = [];
             }
             updateUI();
         }
         
         // บันทึกข้อมูล
         function saveBanks() {
-            localStorage.setItem('promptPayBanks', JSON.stringify(banks));
+            try {
+                localStorage.setItem('qrPromptPay_accounts', JSON.stringify(banks));
+            } catch (error) {
+                console.log('ไม่สามารถบันทึกข้อมูลลง localStorage ได้');
+            }
         }
         
         // เพิ่มธนาคาร
@@ -545,17 +558,23 @@
             const phone = document.getElementById('bankPhone').value.trim();
             
             if (!name || !phone) {
-                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                showNotification('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
                 return;
             }
             
             if (phone.length !== 10 || !/^\d+$/.test(phone)) {
-                alert('เบอร์โทรศัพท์ไม่ถูกต้อง กรุณากรอก 10 หลัก');
+                showNotification('เบอร์โทรศัพท์ไม่ถูกต้อง กรุณากรอก 10 หลัก', 'error');
                 return;
             }
             
             if (banks.length >= 5) {
-                alert('เพิ่มธนาคารได้สูงสุด 5 ธนาคาร');
+                showNotification('เพิ่มบัญชีได้สูงสุด 5 บัญชี', 'error');
+                return;
+            }
+            
+            // ตรวจสอบว่าเบอร์ซ้ำหรือไม่
+            if (banks.some(bank => bank.phone === phone)) {
+                showNotification('เบอร์โทรศัพท์นี้มีอยู่ในระบบแล้ว', 'error');
                 return;
             }
             
@@ -567,19 +586,19 @@
             
             saveBanks();
             updateUI();
+            showNotification('เพิ่มบัญชีพร้อมเพย์สำเร็จ', 'success');
             
             document.getElementById('bankName').value = '';
             document.getElementById('bankPhone').value = '';
-            
-            alert('เพิ่มธนาคารสำเร็จ!');
         }
         
         // ลบธนาคาร
         function deleteBank(id) {
-            if (confirm('ต้องการลบธนาคารนี้ใช่หรือไม่?')) {
+            if (confirm('ต้องการลบบัญชีนี้ใช่หรือไม่?')) {
                 banks = banks.filter(b => b.id !== id);
                 saveBanks();
                 updateUI();
+                showNotification('ลบบัญชีสำเร็จ', 'success');
             }
         }
         
@@ -593,7 +612,7 @@
             
             // อัปเดตรายการธนาคาร
             if (banks.length === 0) {
-                bankList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">ยังไม่มีธนาคาร</p>';
+                bankList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">ยังไม่มีบัญชีพร้อมเพย์</p>';
             } else {
                 bankList.innerHTML = banks.map(bank => `
                     <div class="bank-item">
@@ -611,7 +630,7 @@
             }
             
             // อัปเดต dropdown
-            bankSelect.innerHTML = '<option value="">-- เลือกธนาคาร --</option>';
+            bankSelect.innerHTML = '<option value="">-- เลือกบัญชีพร้อมเพย์ --</option>';
             banks.forEach(bank => {
                 const option = document.createElement('option');
                 option.value = bank.id;
@@ -647,12 +666,12 @@
             const amount = document.getElementById('amount').value;
             
             if (!bankId) {
-                alert('กรุณาเลือกธนาคาร');
+                showNotification('กรุณาเลือกบัญชีพร้อมเพย์', 'error');
                 return;
             }
             
             if (!amount || parseFloat(amount) <= 0) {
-                alert('กรุณาระบุจำนวนเงิน');
+                showNotification('กรุณาระบุจำนวนเงิน', 'error');
                 return;
             }
             
@@ -681,6 +700,7 @@
                 // แสดงผล
                 document.getElementById('displayAmount').textContent = parseFloat(amount).toFixed(2);
                 document.getElementById('qrResult').classList.remove('hidden');
+                showNotification('สร้าง QR Code สำเร็จ', 'success');
             }, 10);
         }
         
@@ -750,7 +770,7 @@
         function downloadQR() {
             const canvas = document.querySelector('#qrcode canvas');
             if (!canvas) {
-                alert('ไม่พบ QR Code');
+                showNotification('ไม่พบ QR Code', 'error');
                 return;
             }
             
@@ -759,6 +779,30 @@
             link.download = `promptpay-${amount}baht.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
+            showNotification('ดาวน์โหลด QR Code สำเร็จ', 'success');
+        }
+        
+        // แสดงการแจ้งเตือน
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notificationText.textContent = message;
+            
+            // ตั้งค่าสีตามประเภท
+            if (type === 'error') {
+                notification.style.background = '#ef4444';
+            } else if (type === 'success') {
+                notification.style.background = '#10b981';
+            } else {
+                notification.style.background = '#667eea';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
         }
         
         // สลับหน้า
@@ -772,34 +816,72 @@
             document.getElementById('settingsPage').classList.add('hidden');
             document.getElementById('qrResult').classList.add('hidden');
         }
-
-        // PWA Installation
+        
+        // PWA Installation - แก้ไขให้แสดงปุ่มในทุกหน้า
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            document.getElementById('installButton').classList.remove('hidden');
-            document.getElementById('installNotice').classList.remove('hidden');
-        });
-
-        document.getElementById('installButton').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    document.getElementById('installButton').classList.add('hidden');
-                    document.getElementById('installNotice').classList.add('hidden');
+            
+            // แสดงปุ่มติดตั้งในทุกหน้า
+            const installButtons = [
+                'installButtonEmpty',
+                'installButtonMain', 
+                'installButtonSettings'
+            ];
+            
+            installButtons.forEach(buttonId => {
+                const button = document.getElementById(buttonId);
+                if (button) {
+                    button.classList.remove('hidden');
                 }
-                deferredPrompt = null;
-            }
-        });
-
-        // ตรวจสอบว่าแอพถูกติดตั้งแล้วหรือไม่
-        window.addEventListener('appinstalled', () => {
-            document.getElementById('installButton').classList.add('hidden');
-            document.getElementById('installNotice').classList.add('hidden');
+            });
+            
+            // เพิ่ม event listener ให้ทุกปุ่ม
+            installButtons.forEach(buttonId => {
+                const button = document.getElementById(buttonId);
+                if (button) {
+                    button.onclick = installPWA;
+                }
+            });
         });
         
-        // เริ่มต้น
+        // ฟังก์ชันติดตั้ง PWA
+        function installPWA() {
+            if (!deferredPrompt) {
+                showNotification('ไม่สามารถติดตั้งแอพได้ในขณะนี้', 'error');
+                return;
+            }
+            
+            deferredPrompt.prompt();
+            
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    showNotification('ติดตั้งแอพสำเร็จ!', 'success');
+                    
+                    // ซ่อนปุ่มทั้งหมดหลังจากติดตั้งสำเร็จ
+                    const installButtons = [
+                        'installButtonEmpty',
+                        'installButtonMain', 
+                        'installButtonSettings'
+                    ];
+                    
+                    installButtons.forEach(buttonId => {
+                        const button = document.getElementById(buttonId);
+                        if (button) {
+                            button.classList.add('hidden');
+                        }
+                    });
+                }
+                deferredPrompt = null;
+            });
+        }
+        
+        // ตรวจสอบว่าแอพถูกติดตั้งแล้วหรือไม่
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('แอพถูกติดตั้งแล้ว');
+        });
+        
+        // โหลดข้อมูลเมื่อเริ่มต้น
         loadBanks();
     </script>
 </body>
